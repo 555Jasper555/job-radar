@@ -30,3 +30,11 @@ Incremental runs: `JOB_RADAR_DAYS=1` narrows the LinkedIn search window to the l
 
 Rules: headless only, keyless only, no paid scraping APIs, descriptive User-Agent, polite delays.
 Nothing is ever fabricated — every row comes from a fetched response and keeps its source URL.
+
+## Tailoring
+
+```
+python -m pipeline.tailor --resume resume.txt --jobs C:/Users/endle/MyStuff/_job-radar-data/scored.jsonl --keyword-map data/keyword-map.json --out C:/Users/endle/MyStuff/_job-radar-data/tailor.jsonl
+```
+
+`coverage_pct` is a direction signal for where a résumé's own wording is thin against what a posting actually asks for, not a ranking metric, and it is not comparable across postings with very different requirement-block lengths. Terms marked `status: ABSENT` are listed for awareness only and are NEVER auto-inserted into any résumé—a human decides what's true.
