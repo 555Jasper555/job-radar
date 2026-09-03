@@ -10,7 +10,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "sources"))
 import common  # noqa: E402
 
 sys.stdout.reconfigure(encoding="utf-8")
-TODAY = date(2026, 9, 2)
+# the freshness points are relative to the run date; JOB_RADAR_TODAY=YYYY-MM-DD pins it for a reproducible rebuild
+TODAY = date.fromisoformat(os.environ["JOB_RADAR_TODAY"]) if os.environ.get("JOB_RADAR_TODAY") else date.today()
 
 TITLE_TIERS = [
     (32, ["agentic", "ai automation", "automation engineer", "forward deployed", "forward-deployed",
