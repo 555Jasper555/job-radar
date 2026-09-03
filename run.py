@@ -30,6 +30,7 @@ def main():
     ap.add_argument("--only", default="")
     ap.add_argument("--min-score", type=int, default=35)
     ap.add_argument("--workers", type=int, default=6)
+    ap.add_argument("--resume")
     a = ap.parse_args()
     os.makedirs(os.path.join(DATA, "raw"), exist_ok=True)
     if not a.skip_sources:
@@ -46,6 +47,11 @@ def main():
     run([PY, "pipeline/merge.py", "--raw", os.path.join(DATA, "raw"), "--out", merged], "merge")
     run([PY, "pipeline/verify.py", "--in", merged, "--out", verified, "--workers", str(a.workers)], "verify")
     run([PY, "pipeline/score.py", "--in", verified, "--out", scored], "score")
+    if a.resume:
+        tailor_rc = run([PY, "pipeline/tailor.py", "--resume", a.resume, "--jobs", scored,
+                         "--out", os.path.join(DATA, "tailor.jsonl"), "--min-score", str(a.min_score)], "tailor")
+        if tailor_rc:
+            raise SystemExit(tailor_rc)
     run([PY, "pipeline/export.py", "--in", scored, "--outdir", os.path.join(DATA, "out"),
          "--min-score", str(a.min_score)], "export")
 

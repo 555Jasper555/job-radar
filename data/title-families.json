@@ -1,0 +1,48 @@
+{
+ "title_families": [
+  {
+   "name": "Forward Deployed",
+   "regex": "forward[\\s\\-]?deployed|deployment engineer|\\bfde\\b"
+  },
+  {
+   "name": "Founding",
+   "regex": "\\bfounding\\b|founder[\\s\\-]?engineer"
+  },
+  {
+   "name": "AI Automation/Workflow",
+   "regex": "(?:ai|intelligent|llm|gen ?ai)[\\s\\-/]{0,3}(?:automation|workflow)|automation\\s+(?:engineer|specialist|developer|architect|consultant|lead)|workflow\\s+(?:automation|engineer)|\\bn8n\\b|\\bzapier\\b|make\\.com|no[\\s\\-]?code|low[\\s\\-]?code|process automation|business automation"
+  },
+  {
+   "name": "Agentic/Agent",
+   "regex": "\\bagentic\\b|\\bai agents?\\b|\\bagent\\s+(?:engineer|developer|architect|systems?)\\b|\\bagents?\\s+engineer\\b|multi[\\s\\-]?agent"
+  },
+  {
+   "name": "Applied AI",
+   "regex": "applied\\s+(?:ai|ml|machine learning|scientist|research)"
+  },
+  {
+   "name": "AI Solutions/Integration",
+   "regex": "(?:ai|ml|llm|gen ?ai|generative ai)[\\s\\-/]{0,3}(?:solutions?|integration|implementation|consultant|consulting|delivery|enablement|adoption|transformation)|solutions?\\s+(?:engineer|architect|consultant|developer)|implementation\\s+(?:engineer|consultant|specialist|manager)|integration\\s+(?:engineer|specialist|developer)|technical\\s+consultant"
+  },
+  {
+   "name": "Full-stack AI",
+   "regex": "full[\\s\\-]?stack.{0,24}(?:ai|ml|llm|gen ?ai)|(?:ai|ml|llm|gen ?ai).{0,24}full[\\s\\-]?stack"
+  },
+  {
+   "name": "AI Engineer (core)",
+   "regex": "\\bai\\s+(?:engineer|developer|programmer|software engineer|technologist|specialist|generalist|builder)|\\ba\\.i\\.\\s+engineer|\\bllm\\s+(?:engineer|developer|specialist)|gen(?:erative)?[\\s\\-]?ai\\s+(?:engineer|developer|specialist|lead)|prompt\\s+engineer|conversational\\s+ai|voice\\s+ai|\\bai/ml\\s+engineer|artificial intelligence\\s+(?:engineer|developer|specialist)|\\bai\\s+lead\\b|ai technical"
+  },
+  {
+   "name": "AI Product/Ops/GTM",
+   "regex": "\\b(?:ai|a\\.i\\.|llm|genai|gen ai|generative ai)\\b[^,|(]{0,28}\\b(?:product|operations|ops|platform|applications?|gtm|innovation|delivery)\\s+(?:engineer|specialist|developer|lead|consultant|analyst)|(?:product|operations|ops|platform|applications?|gtm)\\s+(?:engineer|specialist|developer|lead)[^,|(]{0,28}\\b(?:ai|llm|genai|generative ai)\\b|ai[\\s\\-]native\\s+(?:engineer|operator|developer)|\\bgtm\\s+engineer\\b"
+  },
+  {
+   "name": "ML Engineer",
+   "regex": "machine learning\\s+(?:engineer|scientist|developer)|\\bml\\s+(?:engineer|ops|scientist)\\b|mlops|deep learning|computer vision|nlp engineer|research (?:engineer|scientist)|data scientist"
+  },
+  {
+   "name": "Software Engineer (generic)",
+   "regex": "software\\s+(?:engineer|developer|dev\\b)|full[\\s\\-]?stack|back[\\s\\-]?end|front[\\s\\-]?end|web developer|application developer|\\bsde\\b|\\bswe\\b|python developer|typescript developer|javascript developer|\\bnode\\b|react developer|mobile (?:engineer|developer)|platform engineer|programmer"
+  }
+ ]
+}
