@@ -41,8 +41,11 @@ TITLE_PENALTY = {  # role families that share words with the target but are not 
     -40: ["looking for a job", "looking for an", "seeking a job", "seeking job", "transitioning", "[for hire]",
           "open to work", "my resume", "am i qualified", "how do i get", "advice", "im looking for", "i am looking",
           "i'm looking", "looking for a remote job", "looking for referal", "looking for referral",
-          "looking for a remote opportunity", "fresh graduate", "looking for work", "looking for opportunit"],
+          "looking for a remote opportunity", "fresh graduate", "looking for work", "looking for opportunit",
+          "werkstudent", "working student", "co-op", "student looking", "student seeking", "looking for … co-op",
+          "looking for leads", "looking for co-op"],
     -12: ["architect"],
+    -28: ["campus", "undergraduate", "class of 20", "university program", "phd", "postdoc", "fellow"],
     -22: ["qa ", "qa/", "quality", "test engineer", "sdet", "automation tester", "uipath", "blue prism",
           "automation anywhere", "rpa", "security engineer", "network", "sap ", "servicenow", "salesforce",
           "workday", "sre", "site reliability", "devops", "cloud infra", "infrastructure", "accounting",
@@ -104,7 +107,11 @@ def score(r: dict) -> tuple[int, list[str]]:
         s -= 6; why.append("remote but EU-scoped -6")
     elif remote is None and not loc:
         s += 8; why.append("location unknown +8")
-    elif not remote:
+    elif remote is None and region in ("us", "worldwide", "unknown"):
+        s += 4; why.append("US location, remote not stated +4")
+    elif remote is None:
+        s -= 10; why.append("non-US location, remote not stated -10")
+    else:
         s -= 22; why.append("onsite elsewhere -22")
     et = r.get("employment_type")
     s += {"contract": 8, "full-time": 6, "part-time": 5, "internship": -6}.get(et, 3)
@@ -130,6 +137,10 @@ def score(r: dict) -> tuple[int, list[str]]:
             s += 4; why.append(f"{yrs} yrs +4")
     if "phd" in d and ("required" in d or "must" in d):
         s -= 12; why.append("PhD wording -12")
+    offshore = re.search(r"(latam|latin america|eastern europe|pakistan|india|philippines|south africa|nigeria|vietnam|bangladesh)[^.\n]{0,60}(preferred|only|based|required|must)", d) \
+        or re.search(r"(based|located|residing)\s+in\s+(latam|latin america|eastern europe|pakistan|india|the philippines|south africa|nigeria|vietnam)", d)
+    if offshore and not re.search(r"\b(us|usa|united states|u\.s\.)\b[^.\n]{0,40}(based|located|only|residents?|authorized)", d):
+        s -= 18; why.append("offshore-preferred wording -18")
     if "security clearance" in d or "clearance required" in d:
         s -= 20; why.append("clearance -20")
     if any(w in d for w in ["must be based in", "must reside in", "only candidates in"]) and "california" not in d and "united states" not in d and " us " not in d:

@@ -10,6 +10,7 @@ never kills the run. Status for every board goes to stderr.
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 import time
@@ -585,16 +586,29 @@ BOARDS = [
 def main() -> None:
     args = common.cli("remote job boards -> jsonl")
     all_rows: list[dict] = []
+    # previous run's rows, by board: a board that FAILS this run keeps last run's rows instead of vanishing
+    previous: dict[str, list[dict]] = {}
+    if os.path.exists(args.out):
+        for line in open(args.out, encoding="utf-8"):
+            if line.strip():
+                r = json.loads(line)
+                previous.setdefault(r.get("source", ""), []).append(r)
     for name, fn in BOARDS:
         t0 = time.time()
         try:
             rows = fn()
+            if not rows and previous.get(name):
+                rows = previous[name]
+                log(f"[{name}] returned 0 rows; carrying over {len(rows)} rows from the previous run")
             all_rows.extend(rows)
             st = next((s for s in STATUS if s["board"] == name), {})
             log(f"[{name}] ok  seen={st.get('seen', '?')} kept={st.get('kept', len(rows))} "
                 f"({time.time() - t0:.1f}s) {st.get('note', '')}")
         except Exception as e:  # noqa: BLE001
-            STATUS.append({"board": name, "seen": 0, "kept": 0, "note": f"FAILED {type(e).__name__}: {e}"})
+            carried = previous.get(name, [])
+            all_rows.extend(carried)
+            STATUS.append({"board": name, "seen": 0, "kept": len(carried),
+                           "note": f"FAILED {type(e).__name__}: {e}" + (f" — carried over {len(carried)} previous rows" if carried else "")})
             log(f"[{name}] FAILED {type(e).__name__}: {e}")
             traceback.print_exc(file=sys.stderr)
 

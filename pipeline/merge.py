@@ -94,6 +94,10 @@ def main():
         r.setdefault("sources", [r["source"]])
         r.setdefault("alt_urls", [])
         r["region"] = common.region_of(r.get("location") or "", r.get("remote"))  # re-derive with the current parser
+        if r.get("source") == "reddit" and (r.get("company") or "").startswith("u/"):
+            m = re.search(r"\bat\s+([A-Z][\w.&'-]+(?:\s+[A-Z][\w.&'-]+){0,2})", r.get("title") or "")
+            if m:
+                r["company"] = f"{m.group(1).strip()} (via {r['company']})"
         if norm_txt(r.get("company")) in AGGREGATORS:
             r["aggregator"] = True
             if norm_txt(r.get("company")) == "jobgether":
