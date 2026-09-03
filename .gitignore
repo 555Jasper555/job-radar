@@ -1,0 +1,25 @@
+# secrets
+.env
+.env.*
+!.env.example
+# deps / build
+node_modules/
+.next/
+out/
+dist/
+build/
+__pycache__/
+*.pyc
+.venv/
+# run outputs & scratch never live in a repo
+*.log
+tmp/
+scratch/
+# editor / os
+.DS_Store
+Thumbs.db
+# claude code local state
+.claude/settings.local.json
+.claude/worktrees/
+.claude/allow-worktree-exit
+.claude/ship-guard-park

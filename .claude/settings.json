@@ -1,0 +1,7 @@
+{
+  "_comment": "Per-repo opt-ins only. Hooks, rules, skills, memory come from the global harness (~/.claude/settings.json + junctions). Add project-specific permissions here.",
+  "permissions": {
+    "allow": [],
+    "deny": []
+  }
+}
