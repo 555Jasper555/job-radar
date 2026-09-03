@@ -20,8 +20,13 @@ python run.py --only hn,ats         # just those sources, then the pipeline
 
 Sources: Hacker News hiring threads (Algolia), Greenhouse / Lever / Ashby / Workable /
 SmartRecruiters boards, RemoteOK / Remotive / Himalayas / Jobicy / Arbeitnow / Working Nomads /
-We Work Remotely / ai-jobs.net, LinkedIn guest search, SimplyHired, Built In, Dice, Reddit hiring
-subs via Arctic Shift. Each source script documents what it could and could not reach.
+We Work Remotely / ai-jobs.net, LinkedIn guest search, SimplyHired, Built In, Dice, ZipRecruiter
+(directory pages + `Accept: text/markdown` job records through curl_cffi Chrome impersonation —
+its search path is Cloudflare-challenged, the sanctioned surface in its `llms.txt` is not), Reddit
+hiring subs via Arctic Shift. Each source script documents what it could and could not reach.
+
+Incremental runs: `JOB_RADAR_DAYS=1` narrows the LinkedIn search window to the last day;
+`HTML_BOARDS_ONLY=linkedin` reruns one board and carries the others' rows forward.
 
 Rules: headless only, keyless only, no paid scraping APIs, descriptive User-Agent, polite delays.
 Nothing is ever fabricated — every row comes from a fetched response and keeps its source URL.

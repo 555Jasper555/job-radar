@@ -42,8 +42,9 @@ def check(row: dict, sess) -> dict:
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     if src in ("reddit",):
         return {"status": "unknown", "http": None, "reason": "reddit post; no closed signal", "checked_at": now}
-    if src in ("linkedin", "dice", "simplyhired", "builtin") and len(row.get("description") or "") > 200:
-        # the collector already fetched the guest detail page (404 = gone) minutes ago; don't hammer LinkedIn twice
+    if src in ("linkedin", "dice", "simplyhired", "builtin", "ziprecruiter") and len(row.get("description") or "") > 200:
+        # the collector already fetched the detail page (404 = gone, ZipRecruiter says Status: Active) minutes ago;
+        # don't hammer LinkedIn twice, and a plain-requests refetch of ZipRecruiter only meets the Cloudflare challenge
         return {"status": "open", "http": 200, "reason": "detail page fetched at collection time", "checked_at": now}
     if src == "linkedin":
         m = re.search(r"/jobs/view/(\d+)", url or "")

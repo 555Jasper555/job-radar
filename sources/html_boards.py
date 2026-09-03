@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 """job-radar source: public HTML job boards.
 
-Boards: LinkedIn (guest jobs API), SimplyHired, Built In, Dice, ZipRecruiter,
-Indeed, Glassdoor, Google Jobs.
+Boards: LinkedIn (guest jobs API), SimplyHired, Built In, Dice, plus one-shot probes of
+Indeed, Glassdoor, Google Jobs. ZipRecruiter lives in sources/ziprecruiter.py.
+
+LinkedIn notes (probed 2026-09-03): the guest search pages 10 cards at a time and stops at
+start=300 per query; f_TPR honours r86400 / r259200 / r604800 windows, so JOB_RADAR_DAYS=1
+gives a cheap daily incremental run.
 
 Headless, keyless HTTP only. No browser, no CDP, no cookies, no login, no paid API.
 Detail pages are cached under <data>/raw/html-cache/<source>/<id>.html so reruns
@@ -325,11 +329,15 @@ def scrape_linkedin(f: Fetcher, limit: int = 0) -> list[dict]:
         ("United States", {"f_WT": "2"}, True, "remote"),
         ("San Francisco Bay Area", {}, None, "bayarea"),
     ]
+    # JOB_RADAR_DAYS=1 (or 3, 7) narrows the search window for a daily incremental run; default 30 days.
+    days = int(os.environ.get("JOB_RADAR_DAYS", "30") or 30)
+    tpr = f"r{days * 86400}"
     cards: dict[str, dict] = {}
     for loc, extra, remote, tag in runs:
         for q in QUERIES:
-            for start in range(0, 200, 10):  # guest API returns 10 cards per response
-                params = {"keywords": q, "location": loc, "f_TPR": "r2592000", "start": str(start)}
+            # guest API returns 10 cards per response and stops at start=300 (probed 2026-09-03: 290 is the last page)
+            for start in range(0, 300, 10):
+                params = {"keywords": q, "location": loc, "f_TPR": tpr, "start": str(start)}
                 params.update(extra)
                 url = LI_SEARCH + "?" + urllib.parse.urlencode(params)
                 try:
@@ -761,13 +769,6 @@ def try_urls(f: Fetcher, source: str, urls: list[str]) -> list[dict]:
     return rows
 
 
-def scrape_ziprecruiter(f: Fetcher) -> list[dict]:
-    return try_urls(f, "ziprecruiter", [
-        "https://www.ziprecruiter.com/jobs-search?search=AI+engineer&location=Remote&days=30",
-        "https://www.ziprecruiter.com/jobs-search?search=AI+engineer&location=Remote&days=30&format=rss",
-    ])
-
-
 def scrape_indeed(f: Fetcher) -> list[dict]:
     return try_urls(f, "indeed", [
         "https://www.indeed.com/jobs?q=AI+engineer&l=Remote&fromage=30",
@@ -793,7 +794,8 @@ BOARDS = [
     ("builtin", scrape_builtin, True),
     ("dice", scrape_dice, True),
     ("simplyhired", scrape_simplyhired, True),
-    ("ziprecruiter", scrape_ziprecruiter, False),
+    # ZipRecruiter moved to sources/ziprecruiter.py (its search path is Cloudflare-challenged; the
+    # directory pages + text/markdown job records are not).
     ("indeed", scrape_indeed, False),
     ("glassdoor", scrape_glassdoor, False),
     ("google_jobs", scrape_google_jobs, False),
@@ -803,11 +805,25 @@ BOARDS = [
 def main() -> None:
     args = common.cli("job-radar HTML job boards scraper")
     only = os.environ.get("HTML_BOARDS_ONLY", "").strip()
+    only_names = [x.strip() for x in only.split(",") if x.strip()]
     f = Fetcher()
     all_rows: list[dict] = []
     seen_ids: set[str] = set()
+    if only_names and os.path.exists(args.out):
+        # a partial rerun (e.g. HTML_BOARDS_ONLY=linkedin) must not erase the other boards' rows
+        with open(args.out, encoding="utf-8") as fh:
+            for line in fh:
+                if line.strip():
+                    try:
+                        r = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+                    if r.get("source") not in only_names and r["id"] not in seen_ids:
+                        seen_ids.add(r["id"])
+                        all_rows.append(r)
+        log(f"== carrying {len(all_rows)} rows of boards not in HTML_BOARDS_ONLY ==")
     for name, fn, takes_limit in BOARDS:
-        if only and name not in [x.strip() for x in only.split(",")]:
+        if only_names and name not in only_names:
             continue
         log(f"== {name} ==")
         t0 = time.time()

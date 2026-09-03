@@ -17,12 +17,20 @@ def main():
     ap.add_argument("--share", required=True)
     ap.add_argument("--top", type=int, default=40)
     ap.add_argument("--time", default=datetime.now().strftime("%H:%M"))
+    ap.add_argument("--refreshed", default=datetime.now().strftime("%Y-%m-%d %H:%M"),
+                    help="when this data refresh ran (the note keeps its 2026-09-02 identity)")
+    ap.add_argument("--artifacts", default="Lead Data/2026-09-02 AI Job Radar/ai-job-radar-2026-09-02.csv",
+                    help="vault path of this run's CSV")
+    ap.add_argument("--notes", default="AI Job Radar — Run Notes",
+                    help="basename of this run's vault run-notes note (wikilink target)")
     a = ap.parse_args()
     rows = json.load(open(a.jobs, encoding="utf-8"))
     n = len(rows)
     open_n = sum(1 for r in rows if r.get("verify") == "open")
     remote_n = sum(1 for r in rows if r.get("remote"))
-    fresh = sum(1 for r in rows if (r.get("posted_at") or "") >= "2026-08-26")
+    from datetime import timedelta
+    fresh_cut = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
+    fresh = sum(1 for r in rows if (r.get("posted_at") or "") >= fresh_cut)
     b80 = sum(1 for r in rows if r["score"] >= 80)
     b65 = sum(1 for r in rows if r["score"] >= 65)
     src = Counter(s for r in rows for s in r["sources"])
@@ -59,9 +67,9 @@ def main():
         "- Body: self-taught-friendly wording +10, names Claude Code / Cursor / agents +8, n8n / Zapier +4, stack overlap +6; 8+ years −14, 5+ years −7, PhD required −12, clearance −20, offshore-preferred wording −18.",
         "- Freshness: ≤7 days +10, ≤14 +6, ≤30 +2, older −5. Verified open +5; a closed page zeroes the row.", "",
         "## Sources and honesty", "",
-        "- **Worked (keyless, headless):** Hacker News Who is hiring (Sept + Aug 2026, Algolia); Greenhouse, Lever, Ashby, SmartRecruiters boards (461 boards discovered by web search, a curated AI-company probe, and 4 Firecrawl calls); Himalayas, Jobicy, Arbeitnow, RemoteOK, Remotive, We Work Remotely, Working Nomads, Jobspresso; Wellfound (public role pages); LinkedIn guest search (12 queries × remote-US and Bay Area, past 30 days, detail pages fetched); Reddit hiring subs via Arctic Shift (82 requests, serialized).",
-        "- **Blocked:** SimplyHired, ZipRecruiter, Indeed, Glassdoor (Cloudflare challenges); Workable (per-IP daily cap, 49 live boards saved for a retry after 24 h); Y Combinator Work at a Startup (logged-out search key returns zero hits); Otta / Welcome to the Jungle, ai-jobs.net, remote.io (JS shells, no keyless feed).",
-        "- **Partial at build time:** LinkedIn detail pages were still being fetched when the board was built (1,613 of ~2,632 candidates parsed from the cache). Built In and Dice had not finished. A rerun of `python run.py --skip-sources` after the collector ends refreshes the page at the same URL.",
+        f"- **Data refreshed {a.refreshed}.** The page keeps its 2026-09-02 name and share URL; every refresh rebuilds it from the full raw set, so ticks made in a browser survive.",
+        "- **Worked (keyless, headless):** Hacker News Who is hiring (Sept + Aug 2026, Algolia); Greenhouse, Lever, Ashby, SmartRecruiters boards (461 boards discovered by web search, a curated AI-company probe, and 4 Firecrawl calls); Himalayas, Jobicy, Arbeitnow, RemoteOK, Remotive, We Work Remotely, Working Nomads, Jobspresso; Wellfound (public role pages); LinkedIn guest search (12 queries × remote-US and Bay Area, past 30 days, walked to the guest API's 300-result ceiling per query, every detail page fetched); SimplyHired, Built In, Dice (server-rendered pages with JSON-LD); ZipRecruiter (its search box is behind a Cloudflare challenge, but the directory pages its own `llms.txt` publishes are open — 16 titles × 7 locations, each job page read as a markdown record with a posted date and an Active flag); Reddit hiring subs via Arctic Shift (82 requests, serialized).",
+        "- **Blocked:** Indeed, Glassdoor (Cloudflare challenges); Workable (per-IP daily cap, 49 live boards saved for a retry after 24 h); Y Combinator Work at a Startup (logged-out search key returns zero hits); Otta / Welcome to the Jungle, ai-jobs.net, remote.io (JS shells, no keyless feed). ZipRecruiter's official job-search MCP answers five results a call and rate-limits after a handful, so it is not used.",
         "- **Verify = open** means the posting page returned 200 without a closed phrase, or the source API only lists live jobs. **Unknown** means there was no page to check (a Hacker News comment or a Reddit post). Seven postings came back closed and were dropped.",
         "- Himalayas rate-limited a 45-day backfill (429s); the board carries its 2026-08-31 → 09-03 window. Jobgether rows on Lever are an aggregator reposting partner companies' roles; they are marked and scored −6.", "",
         f"## Top {a.top} at build time", "",
@@ -73,7 +81,7 @@ def main():
             where += f" ({r['region']})"
         lines.append(f"| {i} | {r['score']} | {r['title'][:60].replace('|', '/')} | {r['company'][:36].replace('|', '/')} | {r['employment_type']} | "
                      f"{where[:34].replace('|', '/')} | {r.get('posted_at') or '?'} | [open]({r['url']}) |")
-    lines += ["", "Full ranked list: `Lead Data/2026-09-02 AI Job Radar/ai-job-radar-2026-09-02.csv` (see [[AI Job Radar — Run Notes]]).", "",
+    lines += ["", f"Full ranked list: `{a.artifacts}` (see [[{a.notes}]]).", "",
               "Design: hello-kitty, cyber-minimal-technical family, a range-ring radar contact log: the masthead scope plots every posting at a radius equal to its distance from score 100, and the score-band chips are its rings.", ""]
     open(a.out, "w", encoding="utf-8", newline="\n").write("\n".join(lines))
     print(f"wrote {a.out} ({n} rows, top {a.top})")
