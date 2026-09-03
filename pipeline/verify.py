@@ -42,7 +42,7 @@ def check(row: dict, sess) -> dict:
     now = datetime.now(timezone.utc).isoformat(timespec="seconds")
     if src in ("reddit",):
         return {"status": "unknown", "http": None, "reason": "reddit post; no closed signal", "checked_at": now}
-    if src == "linkedin" and len(row.get("description") or "") > 200:
+    if src in ("linkedin", "dice", "simplyhired", "builtin") and len(row.get("description") or "") > 200:
         # the collector already fetched the guest detail page (404 = gone) minutes ago; don't hammer LinkedIn twice
         return {"status": "open", "http": 200, "reason": "detail page fetched at collection time", "checked_at": now}
     if src == "linkedin":
