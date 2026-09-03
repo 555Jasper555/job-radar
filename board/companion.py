@@ -19,6 +19,10 @@ def main():
     ap.add_argument("--time", default=datetime.now().strftime("%H:%M"))
     ap.add_argument("--refreshed", default=datetime.now().strftime("%Y-%m-%d %H:%M"),
                     help="when this data refresh ran (the note keeps its 2026-09-02 identity)")
+    ap.add_argument("--artifacts", default="Lead Data/2026-09-02 AI Job Radar/ai-job-radar-2026-09-02.csv",
+                    help="vault path of this run's CSV")
+    ap.add_argument("--notes", default="AI Job Radar — Run Notes",
+                    help="basename of this run's vault run-notes note (wikilink target)")
     a = ap.parse_args()
     rows = json.load(open(a.jobs, encoding="utf-8"))
     n = len(rows)
@@ -77,7 +81,7 @@ def main():
             where += f" ({r['region']})"
         lines.append(f"| {i} | {r['score']} | {r['title'][:60].replace('|', '/')} | {r['company'][:36].replace('|', '/')} | {r['employment_type']} | "
                      f"{where[:34].replace('|', '/')} | {r.get('posted_at') or '?'} | [open]({r['url']}) |")
-    lines += ["", "Full ranked list: `Lead Data/2026-09-02 AI Job Radar/ai-job-radar-2026-09-02.csv` (see [[AI Job Radar — Run Notes]]).", "",
+    lines += ["", f"Full ranked list: `{a.artifacts}` (see [[{a.notes}]]).", "",
               "Design: hello-kitty, cyber-minimal-technical family, a range-ring radar contact log: the masthead scope plots every posting at a radius equal to its distance from score 100, and the score-band chips are its rings.", ""]
     open(a.out, "w", encoding="utf-8", newline="\n").write("\n".join(lines))
     print(f"wrote {a.out} ({n} rows, top {a.top})")

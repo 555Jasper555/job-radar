@@ -114,8 +114,9 @@ def score(r: dict) -> tuple[int, list[str]]:
     else:
         s -= 22; why.append("onsite elsewhere -22")
     et = r.get("employment_type")
-    s += {"contract": 8, "full-time": 6, "part-time": 5, "internship": -6}.get(et, 3)
-    why.append(f"{et} {'+' if et != 'internship' else ''}{ {'contract': 8, 'full-time': 6, 'part-time': 5, 'internship': -6}.get(et, 3)}")
+    # internship -30: an "intern" title also reads as entry (+22), so -6 left Summer-2027 internships at 100 (seen 2026-09-03)
+    s += {"contract": 8, "full-time": 6, "part-time": 5, "internship": -30}.get(et, 3)
+    why.append(f"{et} {'+' if et != 'internship' else ''}{ {'contract': 8, 'full-time': 6, 'part-time': 5, 'internship': -30}.get(et, 3)}")
     if r.get("aggregator"):
         s -= 6; why.append("aggregator repost -6")
     if any(w in d for w in SELF_TAUGHT):
