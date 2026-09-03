@@ -11,7 +11,7 @@ import argparse, os, subprocess, sys, time
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 DATA = os.environ.get("JOB_RADAR_DATA", r"C:/Users/endle/MyStuff/_job-radar-data")
-SOURCES = ["hn", "ats", "remote_boards", "html_boards", "reddit"]
+SOURCES = ["hn", "ats", "remote_boards", "html_boards", "ziprecruiter", "reddit"]
 PY = sys.executable
 ENV = {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
 
