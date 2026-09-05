@@ -3,8 +3,10 @@ Read `{{NEW_JSONL}}` (one JSON row per line: a post where a stranger already sta
 `{{PROOF_MD}}` (the only proof links and prices you may use). Write `{{OUT_FILE}}` and nothing else.
 
 Rules, all hard:
-- A row is a BUYER only if it has a budget or rate and a concrete deliverable. If a row is really a
-  help-seeker, a job-seeker advertising themselves, a scam (upfront pay offers, Telegram-only, gift
+- A row is a BUYER if it states pay (a figure, a rate, a monthly amount, or "contract / hourly /
+  part-time" on HN) for engineering work Jasper does. A remote contract or monthly-paid engineering
+  role posted by a company or recruiter COUNTS — draft for it, addressed to the poster. If a row is
+  really a help-seeker, a job-seeker advertising themselves, a scam (upfront pay offers, Telegram-only, gift
   cards, account rental), or work Jasper does not do (design, writing, video, tutoring), list it under
   "Skipped" with a five-word reason. Do not draft for it.
 - Draft at most {{MAX}} applications, best expected-dollars first (score, amount, fit, freshness).
