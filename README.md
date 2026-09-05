@@ -4,6 +4,27 @@ Aggregates every AI / agentic / automation engineer job posting reachable withou
 browser, dedupes them, checks each one is still open, scores fit for Jasper, and exports a
 ranked board.
 
+**Status (2026-09-04):** in daily use for one person's job search. Two full runs so far —
+8,354 raw → 6,627 unique postings (2026-09-02) and 9,757 raw → 7,411 unique (2026-09-03) —
+from 16 keyless sources, each row verified open/closed and scored 0–100 with a `why` list
+that explains the number. Built by [Jasper Liberti](https://jasper-decks.vercel.app/portfolio-dd366b/)
+as one of the data-pipeline pieces behind a self-taught, agent-assisted engineering practice;
+the rest of the work (retrieval + MCP server, LLM evaluation, client apps) is on the portfolio.
+
+What is interesting in here if you are skimming:
+
+- `sources/ziprecruiter.py` — the search pages sit behind a Cloudflare managed challenge; the
+  site's own `llms.txt` documents an unchallenged directory surface and `Accept: text/markdown`
+  job records. Reading the file the site publishes beat every impersonation trick.
+- `pipeline/verify.py` — liveness checks per host, so a closed req never reaches the board.
+- `pipeline/score.py` — an explainable scorer: every point has a reason string.
+- `pipeline/tailor.py` — per-posting résumé coverage against a 281-term keyword map; ABSENT
+  terms are listed and never auto-inserted (a human decides what is true).
+- `sources/remote_boards.py` — a scraper that writes its file only at the end carries the
+  previous run's rows for any board that failed, so one 429 cannot wipe a source.
+
+Data lives outside the repo (`JOB_RADAR_DATA`); nothing personal is committed.
+
 ```
 python run.py                       # scrape all sources -> merge -> verify -> score -> export
 python run.py --skip-sources        # re-run the pipeline on the existing raw/ files
