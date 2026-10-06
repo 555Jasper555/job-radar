@@ -2,7 +2,7 @@
 
     python gigs/register_task.py            # 07:30 then every 6 h for 12 h -> 07:30 / 13:30 / 19:30
     python gigs/register_task.py --show     # just print the task
-    python gigs/register_task.py --run      # fire it once now (hidden window)
+    python gigs/register_task.py --run      # fire it once now (no window)
 
 daily.ps1 is addressed by the MAIN checkout path so a merged branch is what runs.
 """
@@ -12,7 +12,10 @@ import sys
 
 TASK = "gig-scout"
 SCRIPT = r"C:\Users\endle\MyStuff\job-radar\gigs\daily.ps1"
-TR = f'powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File {SCRIPT} -Days 1'
+# powershell.exe -WindowStyle Hidden still CREATES a console and then hides it: a black box flashed
+# on Jasper's screen at every tick (2026-10-06). wscript + run-hidden.vbs never creates the window.
+RUN_HIDDEN = r"C:\Users\endle\MyStuff\harness\bin\win\run-hidden.vbs"
+TR = f'wscript.exe {RUN_HIDDEN} powershell.exe -NoProfile -ExecutionPolicy Bypass -File {SCRIPT} -Days 1'
 
 
 def sh(args: list[str]) -> str:
